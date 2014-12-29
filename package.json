@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "private": true,
+  "name": "CG",
+  "description": "CG project",
+  "devDependencies": {
+    "coffee-script": "~1.7.1",
+    "grunt": "~0.4.2",
+    "grunt-contrib-coffee": "~0.10.1",
+    "grunt-contrib-watch": "~0.5.3",
+  },
+  "scripts": {
+    "prestart": "npm install"
+  }
+}
