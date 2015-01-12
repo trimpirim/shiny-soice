@@ -23,15 +23,18 @@ GL = (function() {
   }
 
   GL.prototype.initGL = function(canvas) {
-    var e, gl;
+    var e, gl, xyOfScreen;
     if (canvas == null) {
       canvas = this.canvas;
     }
     try {
       gl = canvas.getContext('experimental-webgl');
       this.setGL(gl);
-      this.gl.viewportWidth = canvas.width;
-      this.gl.viewportHeight = canvas.height;
+      xyOfScreen = Utils.getXYOfScreen();
+      this.canvas.width = xyOfScreen.x;
+      this.canvas.height = xyOfScreen.y;
+      this.gl.viewportWidth = xyOfScreen.x;
+      this.gl.viewportHeight = xyOfScreen.y;
     } catch (_error) {
       e = _error;
       console.log("Error initializing GL: " + e);
@@ -89,19 +92,37 @@ GL = (function() {
   GL.prototype.initObjects = function() {
     return this.objects.loopAll((function(_this) {
       return function(item) {
-        var buffer;
-        buffer = _this.gl.createBuffer();
-        _this.gl.bindBuffer(_this.gl.ARRAY_BUFFER, buffer);
-        _this.gl.bufferData(_this.gl.ARRAY_BUFFER, new Float32Array(item.vertices), _this.gl.STATIC_DRAW);
-        return item.setBuffer(buffer);
+        item.buffers.addVertex('vertices', item.vertices.toArray());
+        if (item.color != null) {
+          item.color.buffers.addVertex('vertices', item.color.vertices.toArray());
+        }
+        if (item.faces != null) {
+          item.buffers.addIndex('indices', item.faces.toArray());
+        }
+        item.compileBuffers();
+        if (item.color != null) {
+          return item.color.compileBuffers();
+        }
+
+        /*buffer = @gl.createBuffer()
+        @gl.bindBuffer @gl.ARRAY_BUFFER, buffer
+        @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(item.vertices.toArray()), @gl.STATIC_DRAW
+        item.addBuffer 'vertex', buffer
+        if item.faces?
+          buffer = @gl.createBuffer()
+          @gl.bindBuffer @gl.ELEMENT_ARRAY_BUFFER, buffer
+          @gl.bufferData @gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(item.faces.toArray()), @gl.STATIC_DRAW
+          item.addBuffer 'index', buffer
+         */
       };
     })(this));
   };
 
   GL.prototype.drawScene = function() {
+    console.log(this.gl.viewportWidth);
     this.gl.viewport(0, 0, this.gl.viewportWidth, this.gl.viewportHeight);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-    mat4.perspective(45, this.gl.viewportWidth / this.gl.viewportHeight, 0.1, 100.0, Matrices.getMatrix('projectionMatrix'));
+    mat4.perspective(45, this.gl.viewportWidth / this.gl.viewportHeight, 0.1, 1000.0, Matrices.getMatrix('projectionMatrix'));
     mat4.identity(Matrices.getMatrix('modelViewMatrix'));
     return this.loadObjects();
   };
@@ -116,25 +137,42 @@ GL = (function() {
         if (item.animation != null) {
           item.animation();
         }
-        _this.loadObject(item);
+        console.log(item.animation != null);
+        _this.loadBuffers(item);
         if (item.color != null) {
-          _this.loadObject(item.color);
+          _this.loadColor(item.color);
         }
+        console.log(item.color);
         _this.setMatricesUniforms();
-        _this.gl.drawArrays(item.mode, 0, item.rowsCount);
+        item.draw();
         return Matrices.popMatrix('modelViewMatrix');
+      };
+    })(this));
+  };
+
+  GL.prototype.loadColor = function(item) {
+    return item.buffers.loopAll((function(_this) {
+      return function(buffer, key) {
+        _this.gl.bindBuffer(buffer.target, buffer.buffer);
+        return _this.gl.vertexAttribPointer(_this.shaderProgram.vertexColorAttribute, item.vertices.getColumnsCount(), _this.gl.FLOAT, false, 0, 0);
+      };
+    })(this));
+  };
+
+  GL.prototype.loadBuffers = function(item) {
+    return item.buffers.loopAll((function(_this) {
+      return function(buffer, key) {
+        _this.gl.bindBuffer(buffer.target, buffer.buffer);
+        if (buffer.target === _this.gl.ARRAY_BUFFER) {
+          return _this.gl.vertexAttribPointer(_this.shaderProgram.vertexPositionAttribute, item.vertices.getColumnsCount(), _this.gl.FLOAT, false, 0, 0);
+        }
       };
     })(this));
   };
 
   GL.prototype.loadObject = function(item) {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, item.buffer);
-    if (item instanceof Shape) {
-      this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, item.columnsCount, this.gl.FLOAT, false, 0, 0);
-    }
-    if (item instanceof Color) {
-      return this.gl.vertexAttribPointer(this.shaderProgram.vertexColorAttribute, item.columnsCount, this.gl.FLOAT, false, 0, 0);
-    }
+    return this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, item.columnsCount, this.gl.FLOAT, false, 0, 0);
   };
 
   GL.prototype.startGL = function() {
@@ -145,7 +183,7 @@ GL = (function() {
     this.initObjects();
     this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
     this.gl.enable(this.gl.DEPTH_TEST);
-    return this.drawSceneAndAnimate();
+    return this.drawScene();
   };
 
   GL.prototype.drawSceneAndAnimate = function() {

@@ -110,7 +110,7 @@ Objects = (function() {
   Objects.prototype.loopOnlyShapes = function(callback) {
     return this.loopAll((function(_this) {
       return function(item, index) {
-        if (item instanceof Shape) {
+        if (item instanceof Object) {
           if (callback != null) {
             return callback(item, index);
           }

@@ -19,8 +19,12 @@ class GL
     try 
       gl = canvas.getContext 'experimental-webgl'
       @setGL gl
-      @gl.viewportWidth = canvas.width
-      @gl.viewportHeight = canvas.height
+      xyOfScreen = Utils.getXYOfScreen()
+      @canvas.width = xyOfScreen.x
+      @canvas.height = xyOfScreen.y
+      @gl.viewportWidth = xyOfScreen.x
+      @gl.viewportHeight = xyOfScreen.y
+      
     catch e
       console.log "Error initializing GL: #{e}"
 
@@ -72,16 +76,28 @@ class GL
 
   initObjects: () ->
     @objects.loopAll (item) =>
-      buffer = @gl.createBuffer()
+      item.buffers.addVertex 'vertices', item.vertices.toArray()
+      item.color.buffers.addVertex 'vertices', item.color.vertices.toArray() if item.color?
+      item.buffers.addIndex 'indices', item.faces.toArray() if item.faces?
+      item.compileBuffers()
+      item.color.compileBuffers() if item.color?
+
+      ###buffer = @gl.createBuffer()
       @gl.bindBuffer @gl.ARRAY_BUFFER, buffer
-      @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(item.vertices), @gl.STATIC_DRAW
-      item.setBuffer buffer
+      @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(item.vertices.toArray()), @gl.STATIC_DRAW
+      item.addBuffer 'vertex', buffer
+      if item.faces?
+        buffer = @gl.createBuffer()
+        @gl.bindBuffer @gl.ELEMENT_ARRAY_BUFFER, buffer
+        @gl.bufferData @gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(item.faces.toArray()), @gl.STATIC_DRAW
+        item.addBuffer 'index', buffer###
 
   drawScene: () ->
+    console.log @gl.viewportWidth
     @gl.viewport 0, 0, @gl.viewportWidth, @gl.viewportHeight
     @gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
 
-    mat4.perspective 45, @gl.viewportWidth / @gl.viewportHeight, 0.1, 100.0, Matrices.getMatrix('projectionMatrix')
+    mat4.perspective 45, @gl.viewportWidth / @gl.viewportHeight, 0.1, 1000.0, Matrices.getMatrix('projectionMatrix')
     mat4.identity Matrices.getMatrix('modelViewMatrix')
 
     @loadObjects()
@@ -91,26 +107,38 @@ class GL
       mat4.translate Matrices.getMatrix('modelViewMatrix'), item.coordinates if item.coordinates?
       Matrices.pushMatrix 'modelViewMatrix'
       item.animation() if item.animation?
-      @loadObject item
-      @loadObject item.color if item.color?
+      console.log item.animation?
+      @loadBuffers item
+      @loadColor item.color if item.color?
+      console.log item.color
       @setMatricesUniforms()
-      @gl.drawArrays item.mode, 0, item.rowsCount
+      item.draw()
+      #@gl.drawArrays item.mode, 0, item.rowsCount
       Matrices.popMatrix 'modelViewMatrix'
+
+  loadColor: (item) ->
+    item.buffers.loopAll (buffer, key) =>
+      @gl.bindBuffer buffer.target, buffer.buffer
+      @gl.vertexAttribPointer @shaderProgram.vertexColorAttribute, item.vertices.getColumnsCount(), @gl.FLOAT, false, 0, 0
+
+  loadBuffers: (item) ->
+    item.buffers.loopAll (buffer, key) =>
+      @gl.bindBuffer buffer.target, buffer.buffer
+      if (buffer.target == @gl.ARRAY_BUFFER)
+        @gl.vertexAttribPointer @shaderProgram.vertexPositionAttribute, item.vertices.getColumnsCount(), @gl.FLOAT, false, 0, 0
 
   loadObject: (item) ->
     @gl.bindBuffer @gl.ARRAY_BUFFER, item.buffer
-    if item instanceof Shape
-      @gl.vertexAttribPointer @shaderProgram.vertexPositionAttribute, item.columnsCount, @gl.FLOAT, false, 0, 0
-    if item instanceof Color
-      @gl.vertexAttribPointer @shaderProgram.vertexColorAttribute, item.columnsCount, @gl.FLOAT, false, 0, 0
-
+    @gl.vertexAttribPointer @shaderProgram.vertexPositionAttribute, item.columnsCount, @gl.FLOAT, false, 0, 0
+  
   startGL: () ->
     @initGL() if !@gl?
     @initShaders()
     @initObjects()
     @gl.clearColor 0.0, 0.0, 0.0, 1.0
     @gl.enable @gl.DEPTH_TEST
-    @drawSceneAndAnimate()
+    #@drawSceneAndAnimate()
+    @drawScene()
 
   drawSceneAndAnimate: () =>
     requestAnimFrame @drawSceneAndAnimate
