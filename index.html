@@ -29,19 +29,22 @@
       varying vec4 vColor;
 
       void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 5.0);
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 15.0);
         vColor = aVertexColor;
       }
     </script>
   </head>
   <body>
-    <canvas id="canvas" style="border: none;"></canvas>
+    <canvas id="canvas" style="border: none;" tabindex="0"></canvas>
+    <script src="js/Draggable.js"></script>
     <script src="js/SnubCube.js"></script>
+    <script src="js/Axis.js"></script>
     <script src="js/Cube.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/MathUtils.js"></script>
     <script src="js/GLWrapper.js"></script>
     <script src="js/Vertices.js"></script>
+    <script src="js/Vertex2.js"></script>
     <script src="js/Vertex.js"></script>
     <script src="js/Vertex4.js"></script>
     <script src="js/Buffers.js"></script>
@@ -54,7 +57,10 @@
     <script src="js/Triangle.js"></script>
     <script src="js/ObjectsWrapper.js"></script>
     <script src="js/ShadersWrapper.js"></script>
-    <script src="js/fractal.js"></script>
+    <!--<script src="js/fractal.js"></script>-->
+    <script src="js/run.js"></script>
+    <!--<script src="js/triangle.js"></script>-->
+    <script src="js/RunCube.js"></script>
     <script src="js/main.js"></script>
   </body>
 </html>

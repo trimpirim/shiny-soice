@@ -26,15 +26,16 @@ class Fractal
       [3, 4, 0],
       [4, 1, 0]
     ];
+    #https://www.facebook.com/video.php?v=773819846045941
 
     f = new Vertices()
     f.fromArray faces###
 
     vertices = new Vertices()
-    vertices.fromArray Cube.vertices
+    vertices.fromArray SnubCube.vertices
 
     faces = new Vertices()
-    faces.fromArray Cube.faces
+    faces.fromArray SnubCube.faces
     
     ###vertices = new Vertices()
     vertices.add new Vertex(0, 1, 0)
@@ -105,8 +106,14 @@ class Fractal
 
     obj = new Object('someshit', vertices, GL.gl['TRIANGLES'], faces);
     obj.coordinates = [-1.5, 0.0, -4.0]
-    obj.createColor()
-    obj.animate = {
+
+    colorVertices = new Vertices()
+    colorVertices.fromArray SnubCube.colors
+    color = new Object 'someshitColors', colorVertices
+    obj.color = color
+
+    #obj.createColor()
+    ###obj.animate = {
       lastTime: 0
       lastRotation: 0
     }
@@ -118,8 +125,58 @@ class Fractal
         @animate.lastRotation += (90 * elapsed)
       @animate.lastTime = timeNow
 
-      @rotate Matrices.getMatrix('modelViewMatrix'), @animate.lastRotation, [0, 1, 0]
+      @rotate Matrices.getMatrix('modelViewMatrix'), @animate.lastRotation, [0, 1, 0]###
+
+    obj.ondrag = (positions) ->
+      matrix = mat4.create()
+      mat4.identity matrix
+      mat4.rotate matrix, MathUtils.toRadians(positions.deltas.x / 5), [0, 1, 0]
+      mat4.rotate matrix, MathUtils.toRadians(positions.deltas.y / 5), [1, 0, 0]
+      mat4.multiply matrix, @modelMatrix, @modelMatrix
+
+    obj.onkeydown = (ev) ->
+      switch ev.keyCode
+        when 90 #z
+          matrix = mat4.create()
+          mat4.identity matrix
+          mat4.rotate matrix, MathUtils.toRadians(-200 / 5), [0, 1, 0]
+          mat4.multiply matrix, @modelMatrix, @modelMatrix
+        when 88 #x
+          matrix = mat4.create()
+          mat4.identity matrix
+          mat4.rotate matrix, MathUtils.toRadians(-200 / 5), [1, 0, 0]
+          mat4.multiply matrix, @modelMatrix, @modelMatrix
+        when 89 #y
+          matrix = mat4.create()
+          mat4.identity matrix
+          mat4.rotate matrix, MathUtils.toRadians(-200 / 5), [0, 0, 1]
+          mat4.multiply matrix, @modelMatrix, @modelMatrix
+
     @gl.addObject obj
+
+    vertices = new Vertices()
+    vertices.from1DArray Axis.vertices
+
+    lines = new Object 'axis', vertices, GL.gl['LINES']
+    lines.createColor(1.0)
+    lines.coordinates = [-1.5, 0.0, -4.0]
+    lines.ondrag = (positions) ->
+      matrix = mat4.create()
+      mat4.identity matrix
+      mat4.rotate matrix, MathUtils.toRadians(positions.deltas.x / 5), [0, 1, 0]
+      mat4.rotate matrix, MathUtils.toRadians(positions.deltas.y / 5), [1, 0, 0]
+      mat4.multiply matrix, @modelMatrix, @modelMatrix
+    GL.gl.lineWidth(5.0)
+
+    @gl.addObject lines
+
+    @gl.ondrag()
+    @gl.onkeydown()
+
+    ### @gl.ondrag (item) =>
+      mat4.rotate Matrices.getMatrix('modelViewMatrix'), 10, [0, 1, 0]
+      mat4.rotate Matrices.getMatrix('modelViewMatrix'), MathUtils.toRadians(item.deltas.y * 10), [1, 0, 0]
+    ###
 
     ###
     vertices = new Vertices()

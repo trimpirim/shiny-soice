@@ -10,6 +10,10 @@ Object = (function() {
     this.index = index;
     this.buffers = new Buffers();
     this.color = null;
+    this.modelMatrix = mat4.create();
+    mat4.identity(this.modelMatrix);
+    this.ondrag = null;
+    this.onkeydown = null;
   }
 
   Object.prototype.getVertices = function() {
@@ -35,7 +39,8 @@ Object = (function() {
     if (!radians) {
       angle = MathUtils.toRadians(angle);
     }
-    return mat4.rotate(matrix, angle, axis);
+    mat4.rotate(matrix, angle, axis);
+    return mat4.multiply(matrix, this.modelMatrix, this.modelMatrix);
   };
 
   Object.prototype.compileBuffers = function() {
@@ -50,29 +55,29 @@ Object = (function() {
     }
   };
 
-  Object.prototype.createColor = function(sameColor) {
-    var color, doneRandom, j, rand, vertex, vertexArray, vertices, x, z, _i, _j;
-    if (sameColor == null) {
-      sameColor = true;
+  Object.prototype.createColor = function(color) {
+    var j, vertices;
+    if (color == null) {
+      color = null;
     }
     if ((this.color == null) && (this.vertices != null)) {
       j = this.vertices.getRowsCount();
       vertices = new Vertices();
-      for (x = _i = 0; _i <= j; x = _i += 1) {
-        vertexArray = [];
-        doneRandom = false;
-        rand = null;
-        for (z = _j = 0; _j <= 4; z = _j += 1) {
-          if (!doneRandom || !sameColor) {
-            rand = Math.floor((Math.random() * 3) - 1);
-            doneRandom = true;
-          }
-          vertexArray.push(rand);
-        }
-        vertex = new Vertex4();
-        vertex.fromArray(vertexArray);
-        vertices.add(vertex);
-      }
+
+      /*
+        for x in [0..j] by 4
+          
+          rand = null
+          vertex = null
+          for i in [0..4] by 1
+            if !rand?
+              vertex = new Vertex4()
+              for z in [0..3] by 1
+                rand = Math.floor(Math.random() * 2)
+                vertex.loadCoordinate rand
+      
+            vertices.add vertex
+       */
       color = new Object('color', vertices);
       return this.color = color;
     }

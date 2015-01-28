@@ -1,38 +1,33 @@
-var Vertex;
+var Vertex,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-Vertex = (function() {
+Vertex = (function(_super) {
+  __extends(Vertex, _super);
+
   function Vertex(x, y, z) {
     this.x = x;
     this.y = y;
     this.z = z;
+    Vertex.__super__.constructor.call(this, this.x, this.y);
   }
 
   Vertex.prototype.fromArray = function(array) {
-    if (array[0] != null) {
-      this.x = array[0];
-    }
-    if (array[1] != null) {
-      this.y = array[1];
-    }
+    Vertex.__super__.fromArray.call(this, array);
     if (array[2] != null) {
       return this.z = array[2];
     }
   };
 
   Vertex.prototype.loopAll = function(callback) {
-    if (callback != null) {
-      callback(this.x);
-    }
-    if (callback != null) {
-      callback(this.y);
-    }
+    Vertex.__super__.loopAll.call(this, callback);
     if (callback != null) {
       return callback(this.z);
     }
   };
 
   Vertex.prototype.isFull = function() {
-    if ((this.x != null) && (this.y != null) && (this.z != null)) {
+    if (Vertex.__super__.isFull.call(this) && (this.z != null)) {
       return true;
     } else {
       return false;
@@ -40,16 +35,6 @@ Vertex = (function() {
   };
 
   Vertex.prototype.loadCoordinate = function(coordinate) {
-
-    /*
-    switch null
-      when @x
-        @x = coordinate
-      when @y
-        @y = coordinate
-      when @z
-        @z = coordinate
-     */
     if (this.x == null) {
       return this.x = coordinate;
     } else if (this.y == null) {
@@ -61,4 +46,4 @@ Vertex = (function() {
 
   return Vertex;
 
-})();
+})(Vertex2);

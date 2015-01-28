@@ -1,3 +1,6 @@
 class Color extends Object
-  constructor: (@name, @vertices, @rowsCount, @columnsCount, @mode, @index, @coordinates) ->
-    super @name, @vertices, @rowsCount, @columnsCount, @mode, @index, @coordinates
+  constructor: (@name, @vertices, @mode, @faces, @coordinates, @index) ->
+    super @name, @vertices, @mode, @faces, @coordinates, @index
+
+
+  

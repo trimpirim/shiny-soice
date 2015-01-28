@@ -1,5 +1,5 @@
 $(document).ready(function() {
-  var f;
-  f = new Fractal();
-  return f.run();
+  var r;
+  r = new RunCube();
+  return r.run();
 });

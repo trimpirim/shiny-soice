@@ -26,15 +26,16 @@ Fractal = (function() {
       [3, 4, 0],
       [4, 1, 0]
     ];
+     *https://www.facebook.com/video.php?v=773819846045941
     
     f = new Vertices()
     f.fromArray faces
      */
-    var faces, obj, vertices;
+    var color, colorVertices, faces, lines, obj, vertices;
     vertices = new Vertices();
-    vertices.fromArray(Cube.vertices);
+    vertices.fromArray(SnubCube.vertices);
     faces = new Vertices();
-    faces.fromArray(Cube.faces);
+    faces.fromArray(SnubCube.faces);
 
     /*vertices = new Vertices()
     vertices.add new Vertex(0, 1, 0)
@@ -107,23 +108,76 @@ Fractal = (function() {
      */
     obj = new Object('someshit', vertices, GL.gl['TRIANGLES'], faces);
     obj.coordinates = [-1.5, 0.0, -4.0];
-    obj.createColor();
-    obj.animate = {
-      lastTime: 0,
+    colorVertices = new Vertices();
+    colorVertices.fromArray(SnubCube.colors);
+    color = new Object('someshitColors', colorVertices);
+    obj.color = color;
+
+    /*obj.animate = {
+      lastTime: 0
       lastRotation: 0
+    }
+    obj.animation = () ->
+      timeNow = new Date().getSeconds()
+      r = 0
+      if @animate.lastTime != 0 && @animate.lastTime != timeNow
+        elapsed = timeNow - @animate.lastTime
+        @animate.lastRotation += (90 * elapsed)
+      @animate.lastTime = timeNow
+    
+      @rotate Matrices.getMatrix('modelViewMatrix'), @animate.lastRotation, [0, 1, 0]
+     */
+    obj.ondrag = function(positions) {
+      var matrix;
+      matrix = mat4.create();
+      mat4.identity(matrix);
+      mat4.rotate(matrix, MathUtils.toRadians(positions.deltas.x / 5), [0, 1, 0]);
+      mat4.rotate(matrix, MathUtils.toRadians(positions.deltas.y / 5), [1, 0, 0]);
+      return mat4.multiply(matrix, this.modelMatrix, this.modelMatrix);
     };
-    obj.animation = function() {
-      var elapsed, r, timeNow;
-      timeNow = new Date().getSeconds();
-      r = 0;
-      if (this.animate.lastTime !== 0 && this.animate.lastTime !== timeNow) {
-        elapsed = timeNow - this.animate.lastTime;
-        this.animate.lastRotation += 90 * elapsed;
+    obj.onkeydown = function(ev) {
+      var matrix;
+      switch (ev.keyCode) {
+        case 90:
+          matrix = mat4.create();
+          mat4.identity(matrix);
+          mat4.rotate(matrix, MathUtils.toRadians(-200 / 5), [0, 1, 0]);
+          return mat4.multiply(matrix, this.modelMatrix, this.modelMatrix);
+        case 88:
+          matrix = mat4.create();
+          mat4.identity(matrix);
+          mat4.rotate(matrix, MathUtils.toRadians(-200 / 5), [1, 0, 0]);
+          return mat4.multiply(matrix, this.modelMatrix, this.modelMatrix);
+        case 89:
+          matrix = mat4.create();
+          mat4.identity(matrix);
+          mat4.rotate(matrix, MathUtils.toRadians(-200 / 5), [0, 0, 1]);
+          return mat4.multiply(matrix, this.modelMatrix, this.modelMatrix);
       }
-      this.animate.lastTime = timeNow;
-      return this.rotate(Matrices.getMatrix('modelViewMatrix'), this.animate.lastRotation, [0, 1, 0]);
     };
     this.gl.addObject(obj);
+    vertices = new Vertices();
+    vertices.from1DArray(Axis.vertices);
+    lines = new Object('axis', vertices, GL.gl['LINES']);
+    lines.createColor(1.0);
+    lines.coordinates = [-1.5, 0.0, -4.0];
+    lines.ondrag = function(positions) {
+      var matrix;
+      matrix = mat4.create();
+      mat4.identity(matrix);
+      mat4.rotate(matrix, MathUtils.toRadians(positions.deltas.x / 5), [0, 1, 0]);
+      mat4.rotate(matrix, MathUtils.toRadians(positions.deltas.y / 5), [1, 0, 0]);
+      return mat4.multiply(matrix, this.modelMatrix, this.modelMatrix);
+    };
+    GL.gl.lineWidth(5.0);
+    this.gl.addObject(lines);
+    this.gl.ondrag();
+    this.gl.onkeydown();
+
+    /* @gl.ondrag (item) =>
+      mat4.rotate Matrices.getMatrix('modelViewMatrix'), 10, [0, 1, 0]
+      mat4.rotate Matrices.getMatrix('modelViewMatrix'), MathUtils.toRadians(item.deltas.y * 10), [1, 0, 0]
+     */
 
     /*
     vertices = new Vertices()

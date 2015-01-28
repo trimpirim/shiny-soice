@@ -4,6 +4,8 @@ var GL,
 GL = (function() {
   GL.gl = null;
 
+  GL.canvas = null;
+
   GL.getGL = function() {
     return this.gl;
   };
@@ -15,7 +17,7 @@ GL = (function() {
   function GL() {
     this.drawSceneAndAnimate = __bind(this.drawSceneAndAnimate, this);
     this.gl = null;
-    this.canvas = document.getElementById('canvas');
+    GL.canvas = document.getElementById('canvas');
     this.shaders = new Shaders();
     this.objects = new Objects();
     this.shaderProgram = null;
@@ -25,14 +27,14 @@ GL = (function() {
   GL.prototype.initGL = function(canvas) {
     var e, gl, xyOfScreen;
     if (canvas == null) {
-      canvas = this.canvas;
+      canvas = GL.canvas;
     }
     try {
       gl = canvas.getContext('experimental-webgl');
       this.setGL(gl);
       xyOfScreen = Utils.getXYOfScreen();
-      this.canvas.width = xyOfScreen.x;
-      this.canvas.height = xyOfScreen.y;
+      GL.canvas.width = xyOfScreen.x;
+      GL.canvas.height = xyOfScreen.y;
       this.gl.viewportWidth = xyOfScreen.x;
       this.gl.viewportHeight = xyOfScreen.y;
     } catch (_error) {
@@ -119,7 +121,6 @@ GL = (function() {
   };
 
   GL.prototype.drawScene = function() {
-    console.log(this.gl.viewportWidth);
     this.gl.viewport(0, 0, this.gl.viewportWidth, this.gl.viewportHeight);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     mat4.perspective(45, this.gl.viewportWidth / this.gl.viewportHeight, 0.1, 1000.0, Matrices.getMatrix('projectionMatrix'));
@@ -134,15 +135,11 @@ GL = (function() {
           mat4.translate(Matrices.getMatrix('modelViewMatrix'), item.coordinates);
         }
         Matrices.pushMatrix('modelViewMatrix');
-        if (item.animation != null) {
-          item.animation();
-        }
-        console.log(item.animation != null);
+        mat4.multiply(Matrices.getMatrix('modelViewMatrix'), item.modelMatrix);
         _this.loadBuffers(item);
         if (item.color != null) {
           _this.loadColor(item.color);
         }
-        console.log(item.color);
         _this.setMatricesUniforms();
         item.draw();
         return Matrices.popMatrix('modelViewMatrix');
@@ -183,12 +180,37 @@ GL = (function() {
     this.initObjects();
     this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
     this.gl.enable(this.gl.DEPTH_TEST);
-    return this.drawScene();
+    return this.drawSceneAndAnimate();
   };
 
   GL.prototype.drawSceneAndAnimate = function() {
     requestAnimFrame(this.drawSceneAndAnimate);
     return this.drawScene();
+  };
+
+  GL.prototype.ondrag = function() {
+    this.draggable = new Draggable(GL.canvas);
+    return this.draggable.ondrag = (function(_this) {
+      return function(positions) {
+        return _this.objects.loopOnlyShapes(function(item) {
+          if (item.ondrag != null) {
+            return item.ondrag(positions);
+          }
+        });
+      };
+    })(this);
+  };
+
+  GL.prototype.onkeydown = function() {
+    return GL.canvas.addEventListener('keydown', (function(_this) {
+      return function(ev) {
+        return _this.objects.loopOnlyShapes(function(item) {
+          if (item.onkeydown != null) {
+            return item.onkeydown(ev);
+          }
+        });
+      };
+    })(this), false);
   };
 
   return GL;

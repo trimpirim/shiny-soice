@@ -2,6 +2,10 @@ class Object
   constructor: (@name, @vertices, @mode, @faces, @coordinates, @index) ->
     @buffers = new Buffers()
     @color = null
+    @modelMatrix = mat4.create()
+    mat4.identity @modelMatrix
+    @ondrag = null
+    @onkeydown = null
 
   getVertices: () ->
     @vertices
@@ -18,6 +22,7 @@ class Object
   rotate: (matrix, angle, axis, radians = false) ->
     angle = MathUtils.toRadians angle if !radians
     mat4.rotate matrix, angle, axis
+    mat4.multiply matrix, @modelMatrix, @modelMatrix
 
   compileBuffers: () ->
     @buffers.compile()
@@ -28,28 +33,28 @@ class Object
     else 
       GL.gl.drawArrays @mode, 0, @vertices.getRowsCount()
 
-  createColor: (sameColor = true) ->
+  createColor: (color = null) ->
     if !@color? and @vertices?
       j = @vertices.getRowsCount()
       vertices = new Vertices()
 
-      for x in [0..j] by 1
-        vertexArray = []
-        doneRandom = false
-        rand = null
-        for z in [0..4] by 1
-          if !doneRandom or !sameColor
-            rand = Math.floor((Math.random() * 3) - 1)
-            doneRandom = true
-          vertexArray.push rand
+      ###
+        for x in [0..j] by 4
+          
+          rand = null
+          vertex = null
+          for i in [0..4] by 1
+            if !rand?
+              vertex = new Vertex4()
+              for z in [0..3] by 1
+                rand = Math.floor(Math.random() * 2)
+                vertex.loadCoordinate rand
 
-        vertex = new Vertex4()
-        vertex.fromArray(vertexArray)
-        vertices.add vertex
+            vertices.add vertex###
+
 
       color = new Object 'color', vertices
 
       @color = color
-
 
 

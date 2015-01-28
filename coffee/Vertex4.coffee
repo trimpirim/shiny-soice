@@ -9,3 +9,16 @@ class Vertex4 extends Vertex
   loopAll: (callback) ->
     super(callback)
     callback @u if callback?
+
+  isFull: () ->
+    return if super() and @u? then true else false
+
+  loadCoordinate: (coordinate) ->
+    if !@x?
+      @x = coordinate
+    else if !@y?
+      @y = coordinate
+    else if !@z?
+      @z = coordinate
+    else if !@u?
+      @u = coordinate

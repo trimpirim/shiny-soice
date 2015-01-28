@@ -1,33 +1,22 @@
-class Vertex
+class Vertex extends Vertex2
   constructor: (@x, @y, @z) ->
+    super(@x, @y)
 
   fromArray: (array) ->
-    @x = array[0] if array[0]?
-    @y = array[1] if array[1]?
+    super(array)
     @z = array[2] if array[2]?
 
   loopAll: (callback) ->
-    callback @x if callback?
-    callback @y if callback?
+    super(callback)
     callback @z if callback?
 
   isFull: () ->
-    return if @x? and @y? and @z? then true else false
+    return if super() and @z? then true else false
 
   loadCoordinate: (coordinate) ->
-    ###
-    switch null
-      when @x
-        @x = coordinate
-      when @y
-        @y = coordinate
-      when @z
-        @z = coordinate        
-    ###
     if !@x?
       @x = coordinate
     else if !@y?
       @y = coordinate
     else if !@z?
       @z = coordinate
-    

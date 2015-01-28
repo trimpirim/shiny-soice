@@ -1,5 +1,6 @@
 class GL
   @gl: null
+  @canvas: null
   @getGL: ->
     @gl
 
@@ -8,20 +9,21 @@ class GL
 
   constructor: () ->
     @gl = null
-    @canvas = document.getElementById 'canvas'
+    #@canvas = document.getElementById 'canvas'
+    GL.canvas = document.getElementById 'canvas'
     @shaders = new Shaders()
     #@matrices = new Matrices()
     @objects = new Objects()
     @shaderProgram = null
     @initGL()
 
-  initGL: (canvas = @canvas) ->
+  initGL: (canvas = GL.canvas) ->
     try 
       gl = canvas.getContext 'experimental-webgl'
       @setGL gl
       xyOfScreen = Utils.getXYOfScreen()
-      @canvas.width = xyOfScreen.x
-      @canvas.height = xyOfScreen.y
+      GL.canvas.width = xyOfScreen.x
+      GL.canvas.height = xyOfScreen.y
       @gl.viewportWidth = xyOfScreen.x
       @gl.viewportHeight = xyOfScreen.y
       
@@ -58,6 +60,8 @@ class GL
     @shaderProgram.pMatrixUniform = @gl.getUniformLocation @shaderProgram, 'uPMatrix'
     @shaderProgram.mvMatrixUniform = @gl.getUniformLocation @shaderProgram, 'uMVMatrix'
 
+    #https://www.facebook.com/video.php?v=551434775010756
+
   setMatricesUniforms: () ->
     @setMatrixUniform @shaderProgram.pMatrixUniform, Matrices.getMatrix('projectionMatrix')
     @setMatrixUniform @shaderProgram.mvMatrixUniform, Matrices.getMatrix('modelViewMatrix')
@@ -93,12 +97,12 @@ class GL
         item.addBuffer 'index', buffer###
 
   drawScene: () ->
-    console.log @gl.viewportWidth
     @gl.viewport 0, 0, @gl.viewportWidth, @gl.viewportHeight
     @gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
 
     mat4.perspective 45, @gl.viewportWidth / @gl.viewportHeight, 0.1, 1000.0, Matrices.getMatrix('projectionMatrix')
     mat4.identity Matrices.getMatrix('modelViewMatrix')
+    #console.log 'MATRIX', Matrices.getMatrix('modelViewMatrix')
 
     @loadObjects()
 
@@ -106,11 +110,10 @@ class GL
     @objects.loopOnlyShapes (item, index) =>
       mat4.translate Matrices.getMatrix('modelViewMatrix'), item.coordinates if item.coordinates?
       Matrices.pushMatrix 'modelViewMatrix'
-      item.animation() if item.animation?
-      console.log item.animation?
+      mat4.multiply Matrices.getMatrix('modelViewMatrix'), item.modelMatrix
+      #item.animation() if item.animation?
       @loadBuffers item
       @loadColor item.color if item.color?
-      console.log item.color
       @setMatricesUniforms()
       item.draw()
       #@gl.drawArrays item.mode, 0, item.rowsCount
@@ -137,13 +140,24 @@ class GL
     @initObjects()
     @gl.clearColor 0.0, 0.0, 0.0, 1.0
     @gl.enable @gl.DEPTH_TEST
-    #@drawSceneAndAnimate()
-    @drawScene()
+    @drawSceneAndAnimate()
+    #drawScene()
 
   drawSceneAndAnimate: () =>
     requestAnimFrame @drawSceneAndAnimate
     @drawScene()
 
+  ondrag: () ->
+    @draggable = new Draggable GL.canvas
+    @draggable.ondrag = (positions) =>
+      @objects.loopOnlyShapes (item) ->
+        item.ondrag positions if item.ondrag?
+
+  onkeydown: () ->
+    GL.canvas.addEventListener 'keydown', (ev) =>
+      @objects.loopOnlyShapes (item) ->
+        item.onkeydown ev if item.onkeydown?
+    , false
 
 
   

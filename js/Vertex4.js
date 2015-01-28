@@ -27,6 +27,26 @@ Vertex4 = (function(_super) {
     }
   };
 
+  Vertex4.prototype.isFull = function() {
+    if (Vertex4.__super__.isFull.call(this) && (this.u != null)) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  Vertex4.prototype.loadCoordinate = function(coordinate) {
+    if (this.x == null) {
+      return this.x = coordinate;
+    } else if (this.y == null) {
+      return this.y = coordinate;
+    } else if (this.z == null) {
+      return this.z = coordinate;
+    } else if (this.u == null) {
+      return this.u = coordinate;
+    }
+  };
+
   return Vertex4;
 
 })(Vertex);

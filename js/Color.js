@@ -5,15 +5,14 @@ var Color,
 Color = (function(_super) {
   __extends(Color, _super);
 
-  function Color(name, vertices, rowsCount, columnsCount, mode, index, coordinates) {
+  function Color(name, vertices, mode, faces, coordinates, index) {
     this.name = name;
     this.vertices = vertices;
-    this.rowsCount = rowsCount;
-    this.columnsCount = columnsCount;
     this.mode = mode;
-    this.index = index;
+    this.faces = faces;
     this.coordinates = coordinates;
-    Color.__super__.constructor.call(this, this.name, this.vertices, this.rowsCount, this.columnsCount, this.mode, this.index, this.coordinates);
+    this.index = index;
+    Color.__super__.constructor.call(this, this.name, this.vertices, this.mode, this.faces, this.coordinates, this.index);
   }
 
   return Color;

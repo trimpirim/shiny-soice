@@ -8,7 +8,14 @@ class Vertices
       vertex.fromArray coordinate
       @coords.push vertex
 
-  toArray: () ->
+  fromColorArray: (coordinates) ->
+    for coordinate in coordinates
+      vertex = new Vertex4()
+      vertex.fromArray coordinate
+      for i in [0..4]
+        @coords = @coords.concat vertex
+
+  toArray: () =>
     result = []
     for vertex in @coords
       vertex.loopAll (item) =>
@@ -19,7 +26,6 @@ class Vertices
   from1DArray: (coordinates) ->
     vertex = new Vertex
     for coordinate in coordinates
-      console.log coordinate
       if (vertex.isFull())
         @coords.push vertex
         vertex = new Vertex()
