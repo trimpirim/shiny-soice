@@ -7,11 +7,14 @@ Vertices = (function() {
     this.coords = [];
   }
 
-  Vertices.prototype.fromArray = function(coordinates) {
+  Vertices.prototype.fromArray = function(coordinates, callback) {
     var coordinate, vertex, _i, _len, _results;
     _results = [];
     for (_i = 0, _len = coordinates.length; _i < _len; _i++) {
       coordinate = coordinates[_i];
+      if (callback != null) {
+        coordinate = callback(coordinate);
+      }
       vertex = new Vertex();
       vertex.fromArray(coordinate);
       _results.push(this.coords.push(vertex));
@@ -20,22 +23,14 @@ Vertices = (function() {
   };
 
   Vertices.prototype.fromColorArray = function(coordinates) {
-    var coordinate, i, vertex, _i, _len, _results;
-    _results = [];
+    var coordinate, vertex, _i, _len;
     for (_i = 0, _len = coordinates.length; _i < _len; _i++) {
       coordinate = coordinates[_i];
       vertex = new Vertex4();
       vertex.fromArray(coordinate);
-      _results.push((function() {
-        var _j, _results1;
-        _results1 = [];
-        for (i = _j = 0; _j <= 4; i = ++_j) {
-          _results1.push(this.coords.push(vertex));
-        }
-        return _results1;
-      }).call(this));
+      this.coords.push(vertex);
     }
-    return _results;
+    return console.log('COORDS', this.coords);
   };
 
   Vertices.prototype.toArray = function() {

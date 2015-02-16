@@ -39,12 +39,13 @@ class Draggable
     @obj.onmousemove = @move
 
     @positions.old.fromArray [ev.clientX, ev.clientY]
+    console.log 'OLD POSITIONS', @positions.old
 
   up: (ev) =>
     ev = @loadEvent ev
     @isDragging = false
     @obj.onmousemove = null
-    console.log "UP"
+    console.log 'CURRENT POSITIONS', @positions.current
 
   loadEvent: (ev) ->
     ev || window.event

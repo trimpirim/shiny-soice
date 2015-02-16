@@ -49,14 +49,15 @@ Draggable = (function() {
     ev = this.loadEvent(ev);
     this.isDragging = true;
     this.obj.onmousemove = this.move;
-    return this.positions.old.fromArray([ev.clientX, ev.clientY]);
+    this.positions.old.fromArray([ev.clientX, ev.clientY]);
+    return console.log('OLD POSITIONS', this.positions.old);
   };
 
   Draggable.prototype.up = function(ev) {
     ev = this.loadEvent(ev);
     this.isDragging = false;
     this.obj.onmousemove = null;
-    return console.log("UP");
+    return console.log('CURRENT POSITIONS', this.positions.current);
   };
 
   Draggable.prototype.loadEvent = function(ev) {

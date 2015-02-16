@@ -34,23 +34,25 @@ class Object
       GL.gl.drawArrays @mode, 0, @vertices.getRowsCount()
 
   createColor: (color = null) ->
-    if !@color? and @vertices?
+    if @vertices?
       j = @vertices.getRowsCount()
       vertices = new Vertices()
 
-      ###
-        for x in [0..j] by 4
-          
-          rand = null
-          vertex = null
-          for i in [0..4] by 1
-            if !rand?
-              vertex = new Vertex4()
-              for z in [0..3] by 1
-                rand = Math.floor(Math.random() * 2)
-                vertex.loadCoordinate rand
+      for x in [0..j] by 4
+        
+        rand = null
+        vertex = null
+        for i in [0..4] by 1
+          vertex = new Vertex4()
+          for z in [0..3] by 1
+            vertex.loadCoordinate color
+          ###if !rand?
+            vertex = new Vertex4()
+            for z in [0..3] by 1
+              rand = Math.floor(Math.random() * 2)
+              vertex.loadCoordinate rand###
 
-            vertices.add vertex###
+          vertices.add vertex
 
 
       color = new Object 'color', vertices

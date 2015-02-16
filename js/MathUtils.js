@@ -1,4 +1,4 @@
-var MathUtils;
+var MathUtils, Quat;
 
 MathUtils = (function() {
   function MathUtils() {}
@@ -8,5 +8,19 @@ MathUtils = (function() {
   };
 
   return MathUtils;
+
+})();
+
+Quat = (function() {
+  function Quat() {}
+
+  Quat.rotateX = function(quat, angle, dest) {
+    if (dest == null) {
+      dest = quat;
+    }
+    return quat4.multiply(quat, [Math.sin(angle / 2), 0, 0, Math.cos(angle / 2)]);
+  };
+
+  return Quat;
 
 })();

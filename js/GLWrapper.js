@@ -84,13 +84,6 @@ GL = (function() {
     return this.objects.add(obj);
   };
 
-
-  /*addObject: (vertices, rowsCount, columnsCount, optionalParameters = {}) ->
-    mode = @gl[optionalParameters.mode]
-  
-    @objects.add vertices, rowsCount, columnsCount, mode, optionalParameters##
-   */
-
   GL.prototype.initObjects = function() {
     return this.objects.loopAll((function(_this) {
       return function(item) {
@@ -105,17 +98,6 @@ GL = (function() {
         if (item.color != null) {
           return item.color.compileBuffers();
         }
-
-        /*buffer = @gl.createBuffer()
-        @gl.bindBuffer @gl.ARRAY_BUFFER, buffer
-        @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(item.vertices.toArray()), @gl.STATIC_DRAW
-        item.addBuffer 'vertex', buffer
-        if item.faces?
-          buffer = @gl.createBuffer()
-          @gl.bindBuffer @gl.ELEMENT_ARRAY_BUFFER, buffer
-          @gl.bufferData @gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(item.faces.toArray()), @gl.STATIC_DRAW
-          item.addBuffer 'index', buffer
-         */
       };
     })(this));
   };
@@ -125,16 +107,17 @@ GL = (function() {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     mat4.perspective(45, this.gl.viewportWidth / this.gl.viewportHeight, 0.1, 1000.0, Matrices.getMatrix('projectionMatrix'));
     mat4.identity(Matrices.getMatrix('modelViewMatrix'));
+    mat4.translate(Matrices.getMatrix('modelViewMatrix'), [0, 0, -5]);
     return this.loadObjects();
   };
 
   GL.prototype.loadObjects = function() {
     return this.objects.loopOnlyShapes((function(_this) {
       return function(item, index) {
+        Matrices.pushMatrix('modelViewMatrix');
         if (item.coordinates != null) {
           mat4.translate(Matrices.getMatrix('modelViewMatrix'), item.coordinates);
         }
-        Matrices.pushMatrix('modelViewMatrix');
         mat4.multiply(Matrices.getMatrix('modelViewMatrix'), item.modelMatrix);
         _this.loadBuffers(item);
         if (item.color != null) {
@@ -180,7 +163,8 @@ GL = (function() {
     this.initObjects();
     this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
     this.gl.enable(this.gl.DEPTH_TEST);
-    return this.drawSceneAndAnimate();
+    this.drawSceneAndAnimate();
+    return this.ondraw();
   };
 
   GL.prototype.drawSceneAndAnimate = function() {
@@ -211,6 +195,14 @@ GL = (function() {
         });
       };
     })(this), false);
+  };
+
+  GL.prototype.ondraw = function() {
+    return this.objects.loopOnlyShapes(function(item) {
+      if (item.ondraw != null) {
+        return item.ondraw();
+      }
+    });
   };
 
   return GL;

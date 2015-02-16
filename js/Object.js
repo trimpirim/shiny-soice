@@ -56,28 +56,31 @@ Object = (function() {
   };
 
   Object.prototype.createColor = function(color) {
-    var j, vertices;
+    var i, j, rand, vertex, vertices, x, z, _i, _j, _k;
     if (color == null) {
       color = null;
     }
-    if ((this.color == null) && (this.vertices != null)) {
+    if (this.vertices != null) {
       j = this.vertices.getRowsCount();
       vertices = new Vertices();
+      for (x = _i = 0; _i <= j; x = _i += 4) {
+        rand = null;
+        vertex = null;
+        for (i = _j = 0; _j <= 4; i = _j += 1) {
+          vertex = new Vertex4();
+          for (z = _k = 0; _k <= 3; z = _k += 1) {
+            vertex.loadCoordinate(color);
+          }
 
-      /*
-        for x in [0..j] by 4
-          
-          rand = null
-          vertex = null
-          for i in [0..4] by 1
-            if !rand?
-              vertex = new Vertex4()
-              for z in [0..3] by 1
-                rand = Math.floor(Math.random() * 2)
-                vertex.loadCoordinate rand
-      
-            vertices.add vertex
-       */
+          /*if !rand?
+            vertex = new Vertex4()
+            for z in [0..3] by 1
+              rand = Math.floor(Math.random() * 2)
+              vertex.loadCoordinate rand
+           */
+          vertices.add(vertex);
+        }
+      }
       color = new Object('color', vertices);
       return this.color = color;
     }

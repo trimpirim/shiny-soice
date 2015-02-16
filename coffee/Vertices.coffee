@@ -2,8 +2,9 @@ class Vertices
   constructor: () ->
     @coords = []
 
-  fromArray: (coordinates) ->
+  fromArray: (coordinates, callback) ->
     for coordinate in coordinates
+      coordinate = callback(coordinate) if callback?
       vertex = new Vertex()
       vertex.fromArray coordinate
       @coords.push vertex
@@ -12,8 +13,10 @@ class Vertices
     for coordinate in coordinates
       vertex = new Vertex4()
       vertex.fromArray coordinate
-      for i in [0..4]
-        @coords = @coords.concat vertex
+      #for i in [0..2]
+      @coords.push vertex
+
+    console.log 'COORDS', @coords
 
   toArray: () =>
     result = []
