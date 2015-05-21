@@ -68,13 +68,11 @@ GL = (function() {
     this.shaderProgram.vertexColorAttribute = this.gl.getAttribLocation(this.shaderProgram, "aVertexColor");
     this.gl.enableVertexAttribArray(this.shaderProgram.vertexColorAttribute);
     this.shaderProgram.pMatrixUniform = this.gl.getUniformLocation(this.shaderProgram, 'uPMatrix');
-    return this.shaderProgram.mvMatrixUniform = this.gl.getUniformLocation(this.shaderProgram, 'uMVMatrix');
+    this.shaderProgram.mvMatrixUniform = this.gl.getUniformLocation(this.shaderProgram, 'uMVMatrix');
+    return this.shaderProgram.pointSize = this.gl.getUniformLocation(this.shaderProgram, 'pointSize');
   };
 
-  GL.prototype.setMatricesUniforms = function() {
-    this.setMatrixUniform(this.shaderProgram.pMatrixUniform, Matrices.getMatrix('projectionMatrix'));
-    return this.setMatrixUniform(this.shaderProgram.mvMatrixUniform, Matrices.getMatrix('modelViewMatrix'));
-  };
+  GL.prototype.setMatricesUniforms = function() {};
 
   GL.prototype.setMatrixUniform = function(shaderMatrixUniform, matrix) {
     return this.gl.uniformMatrix4fv(shaderMatrixUniform, false, matrix);
@@ -105,25 +103,24 @@ GL = (function() {
   GL.prototype.drawScene = function() {
     this.gl.viewport(0, 0, this.gl.viewportWidth, this.gl.viewportHeight);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-    mat4.perspective(45, this.gl.viewportWidth / this.gl.viewportHeight, 0.1, 1000.0, Matrices.getMatrix('projectionMatrix'));
+    mat4.perspective(Matrices.getMatrix('projectionMatrix'), 45, this.gl.viewportWidth / this.gl.viewportHeight, 0.1, 1000.0);
     mat4.identity(Matrices.getMatrix('modelViewMatrix'));
-    mat4.translate(Matrices.getMatrix('modelViewMatrix'), [0, 0, -5]);
+    mat4.translate(Matrices.getMatrix('modelViewMatrix'), Matrices.getMatrix('modelViewMatrix'), [0, 0, -5]);
+    this.setMatrixUniform(this.shaderProgram.pMatrixUniform, Matrices.getMatrix('projectionMatrix'));
     return this.loadObjects();
   };
 
   GL.prototype.loadObjects = function() {
+    this.gl.uniform1f(this.shaderProgram.pointSize, 5.0);
     return this.objects.loopOnlyShapes((function(_this) {
       return function(item, index) {
         Matrices.pushMatrix('modelViewMatrix');
-        if (item.coordinates != null) {
-          mat4.translate(Matrices.getMatrix('modelViewMatrix'), item.coordinates);
-        }
-        mat4.multiply(Matrices.getMatrix('modelViewMatrix'), item.modelMatrix);
+        mat4.multiply(Matrices.getMatrix('modelViewMatrix'), Matrices.getMatrix('modelViewMatrix'), item.modelMatrix);
         _this.loadBuffers(item);
         if (item.color != null) {
           _this.loadColor(item.color);
         }
-        _this.setMatricesUniforms();
+        _this.setMatrixUniform(_this.shaderProgram.mvMatrixUniform, Matrices.getMatrix('modelViewMatrix'));
         item.draw();
         return Matrices.popMatrix('modelViewMatrix');
       };

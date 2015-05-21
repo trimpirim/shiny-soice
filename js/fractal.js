@@ -16,14 +16,12 @@ Fractal = (function() {
     edgeAxis.createColor(0.2);
     edgeAxis.coordinates = [0, 0, -2];
     edgeAxis.ondraw = function() {
-
-      /*matrix = mat4.create()
-      mat4.identity matrix
-      mat4.rotate matrix, MathUtils.toRadians(15), [1, 0, 0]
-      mat4.rotate matrix, MathUtils.toRadians(-13), [0, 0, 1]
-      mat4.multiply matrix, @modelMatrix, @modelMatrix
-       */
-      return Quat.rotateX(this.modelMatrix, MathUtils.toRadians(10));
+      var matrix;
+      matrix = mat4.create();
+      mat4.identity(matrix);
+      mat4.rotate(matrix, MathUtils.toRadians(15), [1, 0, 0]);
+      mat4.rotate(matrix, MathUtils.toRadians(-13), [0, 0, 1]);
+      return mat4.multiply(matrix, this.modelMatrix, this.modelMatrix);
     };
     edgeAxis.ondrag = function(positions) {
       var matrix;
@@ -136,12 +134,14 @@ Fractal = (function() {
           })(this), TIME);
         case 89:
           TO_ROTATE = 1;
-          TIMES_TO_ROTATE = 72;
+          TIMES_TO_ROTATE = 180;
           TIME = 10;
           rotated = 0;
           return interval = setInterval((function(_this) {
             return function() {
-              mat4.rotate(_this.modelMatrix, MathUtils.toRadians(TO_ROTATE), [0, 1, 0]);
+              mat4.identity(Matrices.modelViewMatrix);
+              mat4.rotate(Matrices.modelViewMatrix, MathUtils.toRadians(TO_ROTATE), [1, 0, 0]);
+              console.log('SHIT HAPPENS');
               rotated++;
               if (rotated === TIMES_TO_ROTATE) {
                 return clearInterval(interval);

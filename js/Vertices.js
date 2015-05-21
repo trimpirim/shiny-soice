@@ -23,14 +23,15 @@ Vertices = (function() {
   };
 
   Vertices.prototype.fromColorArray = function(coordinates) {
-    var coordinate, vertex, _i, _len;
+    var coordinate, vertex, _i, _len, _results;
+    _results = [];
     for (_i = 0, _len = coordinates.length; _i < _len; _i++) {
       coordinate = coordinates[_i];
       vertex = new Vertex4();
       vertex.fromArray(coordinate);
-      this.coords.push(vertex);
+      _results.push(this.coords.push(vertex));
     }
-    return console.log('COORDS', this.coords);
+    return _results;
   };
 
   Vertices.prototype.toArray = function() {
@@ -71,6 +72,12 @@ Vertices = (function() {
   };
 
   Vertices.prototype.add = function(vertex) {
+    var _v;
+    if (vertex instanceof Array) {
+      _v = new Vertex();
+      _v.fromArray(vertex);
+      vertex = _v;
+    }
     return this.coords.push(vertex);
   };
 

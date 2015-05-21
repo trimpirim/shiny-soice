@@ -15,12 +15,12 @@ class Fractal
     edgeAxis.createColor 0.2
     edgeAxis.coordinates = [0, 0, -2]
     edgeAxis.ondraw = ->
-      ###matrix = mat4.create()
+      matrix = mat4.create()
       mat4.identity matrix
       mat4.rotate matrix, MathUtils.toRadians(15), [1, 0, 0]
       mat4.rotate matrix, MathUtils.toRadians(-13), [0, 0, 1]
-      mat4.multiply matrix, @modelMatrix, @modelMatrix###
-      Quat.rotateX @modelMatrix, MathUtils.toRadians(10)
+      mat4.multiply matrix, @modelMatrix, @modelMatrix
+      #Quat.rotateX @modelMatrix, MathUtils.toRadians(10)
     edgeAxis.ondrag = (positions) ->
       matrix = mat4.create()
       mat4.identity matrix
@@ -111,6 +111,7 @@ class Fractal
 
           interval = setInterval () =>
             mat4.rotate @modelMatrix, MathUtils.toRadians(TO_ROTATE), [1, 0, 0]
+            #Quat.rotateX @modelMatrix, MathUtils.toRadians(TO_ROTATE)
 
             rotated++
 
@@ -141,16 +142,20 @@ class Fractal
 
         when 89 #y
           TO_ROTATE = 1
-          TIMES_TO_ROTATE = 72
+          TIMES_TO_ROTATE = 180
           TIME = 10
 
           rotated = 0;
 
           interval = setInterval () =>
             #matrix = mat4.create()
-            #mat4.identity @modelMatrix
-            mat4.rotate @modelMatrix, MathUtils.toRadians(TO_ROTATE), [0, 1, 0]
-            #mat4.multiply edgeAxis.modelMatrix, @modelMatrix, @modelMatrix
+            #mat4.identity matrix
+            #mat4.multiply edge.modelMatrix, @modelMatrix
+            #mat4.rotate matrix, MathUtils.toRadians(TO_ROTATE), [0, 0, 1]
+            mat4.identity Matrices.modelViewMatrix
+            mat4.rotate Matrices.modelViewMatrix, MathUtils.toRadians(TO_ROTATE), [1, 0, 0]
+            console.log 'SHIT HAPPENS'
+            #mat4.multiply matrix, Matrices.getMatrix('modelViewMatrix'), Matrices.getMatrix('modelViewMatrix')
 
             #mat4.rotate @modelMatrix, MathUtils.toRadians(TO_ROTATE), [0, 0, 1]
 

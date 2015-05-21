@@ -1,6 +1,39 @@
 var Object;
 
 Object = (function() {
+  Object.fromCSG = function(csg, name, mode) {
+    var color, colors, faces, indexer, obj, vColor, vertices;
+    indexer = new Indexer();
+    faces = new Vertices();
+    csg.toPolygons().map((function(_this) {
+      return function(polygon) {
+        var i, indices, _i, _ref, _results;
+        indices = polygon.vertices.map(function(vertex) {
+          vertex.color = polygon.shared || [1, 1, 1];
+          return indexer.add(vertex);
+        });
+        _results = [];
+        for (i = _i = 2, _ref = indices.length - 1; _i <= _ref; i = _i += 1) {
+          _results.push(faces.add([indices[0], indices[i - 1], indices[i]]));
+        }
+        return _results;
+      };
+    })(this));
+    vertices = new Vertices();
+    vertices.fromArray(indexer.unique.map(function(v) {
+      return [v.pos.x, v.pos.y, v.pos.z];
+    }));
+    vColor = new Vertices();
+    colors = indexer.unique.map(function(v) {
+      return v.color;
+    });
+    vColor.fromArray(colors);
+    color = new Object('color', vColor);
+    obj = new Object(name, vertices, mode, faces);
+    obj.color = color;
+    return obj;
+  };
+
   function Object(name, vertices, mode, faces, coordinates, index) {
     this.name = name;
     this.vertices = vertices;
@@ -28,19 +61,15 @@ Object = (function() {
     return this.buffers.add(name, buffer);
   };
 
-  Object.prototype.translate = function(matrix) {
-    return mat4.translate(Matrices.getMatrix('modelViewMatrix', matrix));
-  };
+  Object.prototype.translate = function(matrix) {};
 
   Object.prototype.rotate = function(matrix, angle, axis, radians) {
     if (radians == null) {
       radians = false;
     }
     if (!radians) {
-      angle = MathUtils.toRadians(angle);
+      return angle = MathUtils.toRadians(angle);
     }
-    mat4.rotate(matrix, angle, axis);
-    return mat4.multiply(matrix, this.modelMatrix, this.modelMatrix);
   };
 
   Object.prototype.compileBuffers = function() {

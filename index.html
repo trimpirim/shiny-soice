@@ -25,11 +25,13 @@
 
       uniform mat4 uMVMatrix;
       uniform mat4 uPMatrix;
+      uniform float pointSize;
 
       varying vec4 vColor;
 
       void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        gl_PointSize = pointSize;
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 5.0); 
         vColor = aVertexColor;
       }
     </script>
@@ -53,6 +55,7 @@
     <script src="js/Vertex.js"></script>
     <script src="js/Vertex4.js"></script>
     <script src="js/Buffers.js"></script>
+    <script src="js/Indexer.js"></script>
     <script src="js/Buffer.js"></script>
     <script src="js/Matrices.js"></script>
     <script src="js/Object.js"></script>

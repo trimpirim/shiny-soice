@@ -16,8 +16,6 @@ class Vertices
       #for i in [0..2]
       @coords.push vertex
 
-    console.log 'COORDS', @coords
-
   toArray: () =>
     result = []
     for vertex in @coords
@@ -45,6 +43,11 @@ class Vertices
     return @coords.length
 
   add: (vertex) ->
+    if (vertex instanceof Array)
+      _v = new Vertex()
+      _v.fromArray vertex
+      vertex = _v
+
     @coords.push vertex
 
   getElementsCount: () ->

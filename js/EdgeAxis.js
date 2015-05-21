@@ -3,7 +3,7 @@ var EdgeAxis;
 EdgeAxis = (function() {
   function EdgeAxis() {}
 
-  EdgeAxis.vertices = [0, 0, 0, 2, 0, 0];
+  EdgeAxis.vertices = [7.36, 0, 0, 10, 0, 0];
 
   return EdgeAxis;
 

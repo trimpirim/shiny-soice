@@ -59,10 +59,9 @@ class GL
 
     @shaderProgram.pMatrixUniform = @gl.getUniformLocation @shaderProgram, 'uPMatrix'
     @shaderProgram.mvMatrixUniform = @gl.getUniformLocation @shaderProgram, 'uMVMatrix'
+    @shaderProgram.pointSize = @gl.getUniformLocation @shaderProgram, 'pointSize'
 
   setMatricesUniforms: () ->
-    @setMatrixUniform @shaderProgram.pMatrixUniform, Matrices.getMatrix('projectionMatrix')
-    @setMatrixUniform @shaderProgram.mvMatrixUniform, Matrices.getMatrix('modelViewMatrix')
 
   setMatrixUniform: (shaderMatrixUniform, matrix) ->
     @gl.uniformMatrix4fv shaderMatrixUniform, false, matrix
@@ -82,21 +81,28 @@ class GL
     @gl.viewport 0, 0, @gl.viewportWidth, @gl.viewportHeight
     @gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
 
-    mat4.perspective 45, @gl.viewportWidth / @gl.viewportHeight, 0.1, 1000.0, Matrices.getMatrix('projectionMatrix')
+    mat4.perspective Matrices.getMatrix('projectionMatrix'), 45, @gl.viewportWidth / @gl.viewportHeight, 0.1, 1000.0
     mat4.identity Matrices.getMatrix('modelViewMatrix')
-    mat4.translate Matrices.getMatrix('modelViewMatrix'), [0, 0, -5]
+    mat4.translate Matrices.getMatrix('modelViewMatrix'), Matrices.getMatrix('modelViewMatrix'), [0, 0, -5]
+
+    @setMatrixUniform @shaderProgram.pMatrixUniform, Matrices.getMatrix('projectionMatrix')
 
     @loadObjects()
 
   loadObjects: () ->
+    @gl.uniform1f @shaderProgram.pointSize, 5.0
+    
     @objects.loopOnlyShapes (item, index) =>
       Matrices.pushMatrix 'modelViewMatrix'
       #mat4.identity item.modelMatrix
-      mat4.translate Matrices.getMatrix('modelViewMatrix'), item.coordinates if item.coordinates?
-      mat4.multiply Matrices.getMatrix('modelViewMatrix'), item.modelMatrix
+      #mat4.translate Matrices.getMatrix('modelViewMatrix'), item.coordinates if item.coordinates?
+      mat4.multiply Matrices.getMatrix('modelViewMatrix'), Matrices.getMatrix('modelViewMatrix'), item.modelMatrix
       @loadBuffers item
       @loadColor item.color if item.color?
-      @setMatricesUniforms()
+      #@ondraw()
+      #item.ondraw() if item.ondraw?
+      #@setMatricesUniforms()
+      @setMatrixUniform @shaderProgram.mvMatrixUniform, Matrices.getMatrix('modelViewMatrix')
       item.draw()
       Matrices.popMatrix 'modelViewMatrix'
 

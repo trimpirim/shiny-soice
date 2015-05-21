@@ -21,7 +21,7 @@ Matrices = (function() {
   Matrices.pushMatrix = function(matrixName) {
     var copy;
     copy = mat4.create();
-    mat4.set(this.getMatrix(matrixName), copy);
+    mat4.copy(copy, this.getMatrix(matrixName));
     return this.stacks[matrixName].push(copy);
   };
 

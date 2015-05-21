@@ -25,9 +25,9 @@ RunCube = (function(_super) {
       var matrix;
       matrix = mat4.create();
       mat4.identity(matrix);
-      mat4.rotate(matrix, MathUtils.toRadians(positions.deltas.x / 5), [0, 1, 0]);
-      mat4.rotate(matrix, MathUtils.toRadians(positions.deltas.y / 5), [1, 0, 0]);
-      return mat4.multiply(matrix, this.modelMatrix, this.modelMatrix);
+      mat4.rotate(matrix, matrix, MathUtils.toRadians(positions.deltas.x / 5), [0, 1, 0]);
+      mat4.rotate(matrix, matrix, MathUtils.toRadians(positions.deltas.y / 5), [1, 0, 0]);
+      return mat4.multiply(this.modelMatrix, matrix, this.modelMatrix);
     };
     obj.onkeydown = function(ev) {
       var matrix;
@@ -35,8 +35,8 @@ RunCube = (function(_super) {
         case 90:
           matrix = mat4.create();
           mat4.identity(matrix);
-          mat4.rotate(matrix, MathUtils.toRadians(90.0), [0, 0, 1]);
-          return mat4.multiply(matrix, this.modelMatrix, this.modelMatrix);
+          mat4.rotate(matrix, matrix, MathUtils.toRadians(90.0), [0, 0, 1]);
+          return mat4.multiply(this.modelMatrix, matrix, this.modelMatrix);
       }
     };
     this.gl.addObject(obj);

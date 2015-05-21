@@ -13,7 +13,7 @@ class Matrices
 
   @pushMatrix: (matrixName) ->
     copy = mat4.create()
-    mat4.set @getMatrix(matrixName), copy
+    mat4.copy copy, @getMatrix(matrixName)
     @stacks[matrixName].push copy
 
   @popMatrix: (matrixName) ->
